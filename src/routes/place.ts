@@ -1,36 +1,64 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid";
+import Place from "../models/Place";
 
 const router = Router();
 
-let places = [{ id: uuidv4(), name: "Kołobrzeska", lat: 50, lng: 1 }];
-
 router.get("/", (req, res) => {
-  return res.send(places);
+  Place.find((err, items) => {
+    res.send(items);
+  });
 });
 
 router.get("/:id", (req, res) => {
-  const place = places.find((place) => place.id === req.params.id);
+  Place.findById(req.params.id, (err, item) => {
+    if (!item) {
+      return res.status(404).send("Document not found!");
+    }
 
-  return res.send(place);
+    res.send(item);
+  });
 });
 
 router.post("/", (req, res) => {
-  const place = {
-    id: uuidv4(),
+  const place = new Place({
     name: req.body.name,
     lat: req.body.lat,
     lng: req.body.lng,
-  };
+  });
 
-  places.push(place);
+  place.save(function (err, item) {
+    res.send(item);
+  });
+});
 
-  return res.send(place);
+router.put("/:id", (req, res) => {
+  const place = new Place({
+    name: req.body.name,
+    lat: req.body.lat,
+    lng: req.body.lng,
+  });
+
+  Place.findByIdAndUpdate(req.params.id, place, (err, item) => {
+    if (!item) {
+      return res.status(404).send("Document not found!");
+    }
+
+    res.send(item);
+  });
 });
 
 router.delete("/:id", (req, res) => {
-  places = places.filter((place) => place.id !== req.params.id);
-  return res.send();
+  Place.findByIdAndRemove(req.params.id, (err, item) => {
+    if (!item) {
+      return res.status(404).send("Document not found!");
+    }
+
+    if (err) {
+      return res.send("Deletion error!");
+    }
+
+    res.status(200).send("Deleted successfully!");
+  });
 });
 
 export default router;

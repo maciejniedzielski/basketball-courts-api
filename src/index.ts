@@ -9,11 +9,11 @@ const ENV = app.get("env");
 
 app.set("port", process.env.PORT || 3000);
 
+// Register core middlewares
+app.use([express.json(), logger]);
+
 // Register routing
 routes(app);
-
-// Register middlewares
-app.use([express.json(), logger, notFound]);
 
 mongoose
   .connect("mongodb://localhost:27017/basketball-courts", {
